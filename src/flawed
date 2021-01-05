@@ -1,0 +1,106 @@
+/**
+     * Generates a pseudorandom hexadecimal code within a range specified by user input that MAY NOT ACTUALLY BE BETWEEN THE RANGE ON THE COLOR SPECTRUM.
+     * NOTE: This hexadecimal will be "objectively" between the two hexadecimals given,
+     * meaning you may put in 6A0DAD (Your Personal Purple Color) and FFC0CB (Pink), and the System could give you teal.
+     * HOW IT WORKS: The method determines the range of colors by assigning every possible hexadecimal code an integer value, called a log_hex in this instance.
+     * This is an attempt to organize hexadecimal codes linearly, though hexadecimal codes do not appear to work in linear sequences when initially viewed.
+     * There are most likely better ways of categorizing hexadecimal codes, but here is this method:
+     * Each character of the hexadecimal is assigned an integer value 0-15, corresponding with its generally accepted index in the array of hexadecimals:
+     *
+     * char[] hexadecimal = {
+     *                 '0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F',
+     *         };
+     *         int[] loghexes = {
+     *                 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15
+     *         };
+     * For example, your Personal Purple Color #6A0DAD will be interpreted as ArrayList<String> loghexvalues = {6,10,0,13,10,13};
+     * The Strings assigned, parsed as ints, will then be multiplied by 10 to the power of the reverse-position in the ArrayList.
+     * This results in:
+     * 6 * (Math.pow(10,5)); //10^5
+     * 10 * (Math.pow(10,4)); //10^4
+     * 0 * (Math.pow(10,3)); //10^3
+     * 13 * (Math.pow(10,2)); //10^2
+     * 10* (Math.pow(10,1)); //10^1
+     * 13 * (Math.pow(10,0)); //10^0, a.k.a. 1.
+     *
+     * The values are then added to result in 701323.
+     * Pink has its own value upwards of 1.6 million.
+     * Any hex between hex 701323 and ~1.6 million is fair game.
+     *essentially, DON'T USE THIS METHOD.
+     * The only benefit is that it accesses all 16,777,216 possible hex codes,
+     * whereas random_hex_inRange and get_random_hex_inRange only access the codes existing in String[]AllColors and String[]AllHexadecimal, each initially containing 142 colors.
+     * @return RandomHex the pseudorandom hex in the given range
+     */
+    public static String flawed_random_hex_inRange() {
+        //Purple: #6A0DAD
+        //Pink: #FFC0CB
+        char[] hexadecimal = {
+                '0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F',
+        };
+        int[] loghexes = {
+                0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15
+        };
+        p("This program will print a pseudorandom hexadecimal String between two hexadecimal Strings of your choice. The pseudorandom hexadecimal will be between: # [enter a hexadecimal code without the #] ");
+        ArrayList<Integer> finalBounds = new ArrayList<>(2);
+        ArrayList<String>inputs = new ArrayList<>(2);
+        for (int y = 0; y < 2; y++) {
+            ArrayList<String> loghexvalues = new ArrayList<>(6);
+            p("bound: ");
+            Scanner s = new Scanner(System.in);
+            String userInput = s.next();
+            inputs.add(userInput);
+            for (int i = 0; i < userInput.length(); i++) {
+                char c = userInput.charAt(i);
+                int equivalent;
+                if (Character.isLetter(c)) {
+                    for (int j = 0; j < hexadecimal.length; j++) {
+                        if (c == hexadecimal[j]) {
+                            equivalent = loghexes[j];
+                            loghexvalues.add(" "+equivalent);
+                        }
+                    }
+                } else {
+                    loghexvalues.add(" "+ c);
+                }
+            }
+//            p(loghexvalues.toString());
+            int final_loghex_value =0;
+            for (int i = 0, e = 5; i < loghexvalues.size() && e >=0; i++, e--) {
+                double coefficient = Math.pow(10, e);
+//                p("e:  "+e);
+//                p("coefficient: " + coefficient);
+                double loghex = Double.parseDouble(loghexvalues.get(i));
+                int product = (int) (coefficient * loghex);
+                final_loghex_value += product;
+            }
+//            p(final_loghex_value);
+            finalBounds.add(final_loghex_value);
+        }
+//        p(inputs);
+//        p(finalBounds);
+        int difference = finalBounds.get(1)-finalBounds.get(0);
+        Random random = new Random();
+        ArrayList<Double> loghexes_all = new ArrayList<Double>(difference);
+        int rand = random.nextInt(difference);
+        ArrayList<String> hexes_all = new ArrayList<String>();
+        for (int i = 0; i < 16; i++) {
+            for (int j = 0; j < 16; j++) {
+                for (int k = 0; k < 16; k++) {
+                    for (int l = 0; l < 16; l++) {
+                        for (int m = 0; m < 16; m++) {
+                            for (int n = 0; n < 16; n++) {
+                                String hex = String.valueOf(hexadecimal[i]) + "" + String.valueOf(hexadecimal[j]) + "" +String.valueOf(hexadecimal[k]) + "" +String.valueOf(hexadecimal[l]) + "" +String.valueOf(hexadecimal[m]) + "" +String.valueOf(hexadecimal[n]);
+                                hexes_all.add(hex);
+                                double loghex =(((Math.pow(10, 5)) * loghexes[i]) + ((Math.pow(10, 4)) * loghexes[j]) + ((Math.pow(10, 3)) * loghexes[k]) +((Math.pow(10, 2)) * loghexes[l]) +((Math.pow(10, 1)) * loghexes[m]) +((Math.pow(10, 0)) * loghexes[n]));
+                                loghexes_all.add(loghex);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        double index = loghexes_all.get(rand);
+        String RandomHex = "Random Hex:     #" +hexes_all.get((int)index);
+        p(RandomHex);
+        return RandomHex;
+    }
